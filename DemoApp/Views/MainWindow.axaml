@@ -1,0 +1,201 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:DemoApp.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:employees="clr-namespace:EmployeesService.Employees;assembly=EmployeesService"
+        xmlns:system="clr-namespace:System;assembly=System.Runtime"
+        xmlns:valueConverters="clr-namespace:DemoApp.ValueConverters"
+        xmlns:demoApp="clr-namespace:DemoApp"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="DemoApp.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="DemoApp">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainWindowViewModel />
+    </Design.DataContext>
+    <Window.Resources>
+        <valueConverters:CollectionEmptyConverter x:Key="CollectionEmptyConverter" />
+        <valueConverters:ObjectToTypeNameConverter x:Key="ObjectToTypeNameConverter" />
+    </Window.Resources>
+
+    <Grid HorizontalAlignment="Stretch">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="200"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Border
+            BorderBrush="Blue"
+            BorderThickness="2"
+            CornerRadius="10"
+            Padding="10" Margin="10,10,3,3">
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" >
+                <Border
+                    Height="135"
+                    BorderBrush="Blue"
+                    BorderThickness="1"
+                    CornerRadius="5"
+                    Padding="10" Margin="3">
+
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" Spacing="5">
+                        <TextBlock
+                            Text="Selected Employee info:"
+                            Margin="0,0,0,7"
+                            HorizontalAlignment="Left" VerticalAlignment="Top" Classes="h4 Accent"/>
+                       <StackPanel Orientation="Vertical" Spacing="5"
+                                   IsVisible="{Binding SelectedTreeNode, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                   >
+                           <TextBlock
+                               Text="{Binding SelectedEmployee.Name, StringFormat='Employee name: {0}'}"
+                               HorizontalAlignment="Left" VerticalAlignment="Center" />
+                           <TextBlock
+                               Text="{Binding SelectedEmployee, StringFormat='Employee type: {0}', Converter={StaticResource ObjectToTypeNameConverter}}"
+                               HorizontalAlignment="Left" VerticalAlignment="Center" />
+                           <TextBlock
+                               Text="{Binding SelectedEmployee.BaseRate, StringFormat='Base rate: {0}'}"
+                               HorizontalAlignment="Left" VerticalAlignment="Center" />
+                           <TextBlock
+                               Text="{Binding SelectedEmployee.YearsInCompany, StringFormat='Years in Company: {0}'}"
+                               HorizontalAlignment="Left" VerticalAlignment="Center" />
+                       </StackPanel>
+                        
+
+                    </StackPanel>
+                </Border>
+                <TreeView ItemsSource="{Binding Employees}"
+                          SelectionMode="Single"
+                          SelectedItem="{Binding SelectedTreeNode}"
+                          Width="400" Height="480"
+                          HorizontalAlignment="Left">
+                    <TreeView.DataTemplates>
+                        <TreeDataTemplate DataType="demoApp:TreeNode" ItemsSource="{Binding Subordinates}">
+                            <TextBlock Text="{Binding Value.Name}"/>
+                        </TreeDataTemplate>
+                        <DataTemplate DataType="demoApp:TreeNode">
+                            <TextBlock Text="{Binding Value.Name}" />
+                        </DataTemplate>
+                    </TreeView.DataTemplates>
+                </TreeView>
+            </StackPanel>
+        </Border>
+        
+
+        <Border Grid.Column="1" Grid.Row="0" Grid.RowSpan="2"
+                BorderBrush="Blue"
+                BorderThickness="2"
+                CornerRadius="10"
+                Padding="10" Margin="0,10,10,10">
+
+            <Grid HorizontalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="3*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="60"></RowDefinition>
+                    <RowDefinition Height="60"></RowDefinition>
+                    <RowDefinition Height="60"></RowDefinition>
+                    <RowDefinition Height="60"></RowDefinition>
+                    <RowDefinition Height="60"></RowDefinition>
+                    <RowDefinition Height="60"></RowDefinition>
+
+                </Grid.RowDefinitions>
+                <TextBlock Grid.ColumnSpan="2" Text="Add employee:" HorizontalAlignment="Left" FontSize="15"
+                           VerticalAlignment="Top" />
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Name" VerticalAlignment="Center" />
+                <TextBox Grid.Row="1" Grid.Column="1"
+                         Height="60"
+                         Text="{Binding EmployeeName}"
+                         VerticalAlignment="Center"
+                         HorizontalAlignment="Stretch" />
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Base rate" VerticalAlignment="Center" />
+                
+                <NumericUpDown Grid.Row="2" Grid.Column="1"
+                               Value="{Binding EmployeeBaseRate}"
+                               Increment="100"
+                               Minimum="0"
+                               Maximum="500000"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Stretch" />
+                
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Employment date" VerticalAlignment="Center" />
+                <CalendarDatePicker x:Name="employmentDatePicker"  Grid.Row="3" Grid.Column="1" SelectedDate="{Binding EmploymentDate, Mode=TwoWay}" />
+                
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Employment date" VerticalAlignment="Center" />
+
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="Employee type" VerticalAlignment="Center" />
+
+                <ComboBox Grid.Row="4" Grid.Column="1" x:Name="typeEmployee"
+                          SelectedItem="{Binding EmployeeType}"
+                          VerticalAlignment="Center" HorizontalAlignment="Stretch">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="{x:Type system:Type}">
+                            <TextBlock Text="{Binding Name }" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                
+                <Button  Grid.Row="5" Grid.Column="0"
+                         Command="{Binding AddEmployeeCommand}"
+                         IsEnabled="{Binding SelectedTreeNode, Converter={x:Static ObjectConverters.IsNotNull}}" 
+                         IsVisible="{Binding Employees, Converter={x:Static ObjectConverters.IsNotNull}}" 
+                         Classes="Primary" HorizontalAlignment="Left">
+                    <TextBlock>Add employee</TextBlock>
+                </Button>
+                <Button  Grid.Row="5" Grid.Column="1"
+                         Command="{Binding AddTopLeaderCommand}"
+                         IsVisible="{Binding !HasTopLeader}" 
+                         Classes="Primary" HorizontalAlignment="Left">
+                    <TextBlock>Add top leader</TextBlock>
+                </Button>
+            </Grid>
+
+        </Border>
+        
+        <Border Grid.Column="0" Grid.Row="1" 
+                BorderBrush="Blue"
+                BorderThickness="2"
+                CornerRadius="10"
+                Padding="10" Margin="10,0,3, 10">
+
+
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" Spacing="10">
+                <TextBlock Text="{Binding TotalSalary, StringFormat='Total company salary: {0}'}"
+                           HorizontalAlignment="Left" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding EmployeeSalary, StringFormat='Salary: {0}'}"
+                           HorizontalAlignment="Left" VerticalAlignment="Center" />
+
+                <StackPanel  HorizontalAlignment="Stretch" Orientation="Horizontal"
+                             VerticalAlignment="Center" Spacing="15">
+                    <Button Classes="Primary" HorizontalAlignment="Left"
+                            Command="{Binding CalculateCompanySalaryCommand}"
+                            IsEnabled="{Binding HasTopLeader}" 
+                    >
+                        <TextBlock>Calculate total company salary</TextBlock>
+                    </Button>
+                    <Button Classes="Primary"  HorizontalAlignment="Left"
+                            Command="{Binding CalculateEmployeeSalaryCommand}"
+                            IsEnabled="{Binding SelectedTreeNode, Converter={x:Static ObjectConverters.IsNotNull}}"
+                            >
+                        <TextBlock>Calculate selected employee salary</TextBlock>
+                    </Button>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+
+    </Grid>
+
+
+</Window>
